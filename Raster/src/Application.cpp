@@ -8,30 +8,52 @@
 
 #include "Object.h"
 #include "Shader.h"
+#include "Window.h"
 
 int main()
 {
 	Object o;
-	o.loadFromFile("files/esfera.obj");
+    o.loadFromFile("files/gremlin.obj");
     
-    const cv::String wndname = "Flat Shader";
-    int width = 1280, height = 720;
+    //main window
+    Window::init("Flat Shader", 1080, 720, 75);
 
     while (true)
     {
-        cv::Mat image = cv::Mat::zeros(height, width, CV_8UC3);
+        Window::reset();
 
         for(auto& mesh : o.getMeshes())
             for (auto& face : mesh.get()->faces)
-                shader::perspective(face.get()->vertices, 400, image);
+                shader::perspective(face.get()->vertices, 400);
 
-        cv::imshow(wndname, image);
-        cv::waitKey(1000 / 60); //60fps
+        //animation example
+        o.rotate(1, 1, 1);
+
+        if (Window::current_frame % 600 <= 150)
+        {
+            o.scale(1.002);
+            o.translate(1, 0, 0);
+        }
+        else if(Window::current_frame % 600 <= 300)
+        {
+            o.scale(0.998);
+            o.translate(-1, 0, 0);
+        }
+        else if (Window::current_frame % 600  <= 450)
+        {
+            o.scale(1.002);
+            o.translate(-1, 0, 0);
+        }
+        else if (Window::current_frame % 600 <= 600)
+        {
+            o.scale(0.998);
+            o.translate(1, 0, 0);
+        }
+
+        Window::update();
     }
 
-    cv::waitKey(0);
     std::cin.get();
 
     return 0;
-
 }

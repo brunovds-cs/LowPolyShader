@@ -5,6 +5,8 @@
 
 #include "Object.h"
 
+#define M_PI 2 * std::asin(1.0)
+
 void Object::loadFromFile(const char* path)
 {
 	std::ifstream file;
@@ -85,10 +87,104 @@ const int Object::getVerticesCount() const
 	int count = 0;
 	for (auto mesh : meshes)
 		for (auto face : mesh.get()->faces)
-			for (auto vertex : face.get()->vertices)
-				count++;
+			count += face.get()->vertices.size();
 
 	return count;
+}
+
+void Object::scale(double sx, double sy, double sz)
+{
+	for (auto mesh : meshes)
+		for (auto face : mesh.get()->faces)
+			for (auto vertex : face.get()->vertices)
+			{
+				vertex.get()->v.x = vertex.get()->v.x * sx;
+				vertex.get()->v.y = vertex.get()->v.y * sy;
+				vertex.get()->v.z = vertex.get()->v.z * sz;
+			}
+}
+
+void Object::scale(double s)
+{
+	for (auto mesh : meshes)
+		for (auto face : mesh.get()->faces)
+			for (auto vertex : face.get()->vertices)
+			{
+				vertex.get()->v.x = vertex.get()->v.x * s;
+				vertex.get()->v.y = vertex.get()->v.y * s;
+				vertex.get()->v.z = vertex.get()->v.z * s;
+			}
+}
+
+void Object::translate(double tx, double ty, double tz)
+{
+	for (auto mesh : meshes)
+		for (auto face : mesh.get()->faces)
+			for (auto vertex : face.get()->vertices)
+			{
+				vertex.get()->v.x = vertex.get()->v.x + tx;
+				vertex.get()->v.y = vertex.get()->v.y + ty;
+				vertex.get()->v.z = vertex.get()->v.z + tz;
+			}
+}
+
+void Object::rotate(double rx, double ry, double rz)
+{
+	//to radian
+	rx = rx * M_PI / 180;
+	ry = ry * M_PI / 180;
+	rz = rz * M_PI / 180;
+
+	//save object position
+	Vec3f center = getCenter();
+
+	for (auto mesh : meshes)
+		for (auto face : mesh.get()->faces)
+			for (auto vertex : face.get()->vertices)
+			{
+				//translate to center (rotate aroud itself)
+				vertex.get()->v.x -= center.x;
+				vertex.get()->v.y -= center.y;
+				vertex.get()->v.z -= center.z;
+
+				//rotate
+				if (rx != 0)
+				{
+					vertex.get()->v.y = vertex.get()->v.y * std::cos(rx) + vertex.get()->v.z * - std::sin(rx);
+					vertex.get()->v.z = vertex.get()->v.y * std::sin(rx) + vertex.get()->v.z * std::cos(rx);
+				}
+				if (ry != 0)
+				{
+					vertex.get()->v.x = vertex.get()->v.x * std::cos(ry) + vertex.get()->v.z * std::sin(ry);
+					vertex.get()->v.z = vertex.get()->v.x * -std::sin(ry) + vertex.get()->v.z * std::cos(ry);
+				}
+				if (rz != 0)
+				{
+					vertex.get()->v.x = vertex.get()->v.x * std::cos(rz) + vertex.get()->v.y * -std::sin(rz);
+					vertex.get()->v.y = vertex.get()->v.x * std::sin(rz) + vertex.get()->v.y * std::cos(rz);
+				}
+
+				//back to original position
+				vertex.get()->v.x += center.x;
+				vertex.get()->v.y += center.y;
+				vertex.get()->v.z += center.z;
+				
+			}
+}
+
+Vec3f Object::getCenter()
+{
+	double x = 0, y = 0, z = 0;
+	for (auto mesh : meshes)
+		for (auto face : mesh.get()->faces)
+			for (auto vertex : face.get()->vertices)
+			{
+				x += vertex.get()->v.x;
+				y += vertex.get()->v.y;
+				z += vertex.get()->v.z;
+			}
+
+	return Vec3f(x / getVerticesCount(), y / getVerticesCount(), z / getVerticesCount());
 }
 
 Vec3f Face::getNormal() 
@@ -98,3 +194,4 @@ Vec3f Face::getNormal()
 
 	return v1.crossProduct(v2).normalize();
 }
+

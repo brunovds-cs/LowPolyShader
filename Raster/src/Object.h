@@ -24,7 +24,10 @@ struct Face
 
 	Face(std::vector<std::shared_ptr<Vertex>> v) : vertices(v){}
 
+	//get face normal
 	Vec3f getNormal();
+	
+
 };
 
 struct Mesh
@@ -44,6 +47,19 @@ public:
 	Object() {}
 	
 	std::vector<std::shared_ptr<Mesh>> getMeshes() { return this->meshes; };
+	
+	//load object with file .obj
 	void loadFromFile(const char* path);
+
+	//get vertices count
 	const int getVerticesCount() const;
+
+	//transformations
+	void rotate(double rx, double ry, double rz);
+	void scale(double s);
+	void scale(double sx, double sy, double sz);
+	void translate(double tx, double ty, double tz);
+
+	//get object center
+	Vec3f getCenter();
 };

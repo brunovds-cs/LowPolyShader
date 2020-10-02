@@ -9,7 +9,7 @@
 namespace shader
 {
 	//trace a line between two points using bresenham algorithm
-	void traceLine(cv::Point p1, cv::Point p2, cv::Mat& image);
+	void traceLine(cv::Point p1, cv::Point p2);
 	//perspective projection
-	void perspective(std::vector<std::shared_ptr<Vertex>> vertices, uint32_t pov, cv::Mat& image);
+	void perspective(std::vector<std::shared_ptr<Vertex>> vertices, uint32_t pov);
 }

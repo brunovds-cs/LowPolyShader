@@ -1,8 +1,9 @@
 #include <Math.h>
 
 #include "Shader.h"
+#include "Window.h"
 
-void shader::traceLine(cv::Point p1, cv::Point p2, cv::Mat& image)
+void shader::traceLine(cv::Point p1, cv::Point p2)
 {
 	int declive, dx, dy, incE, incNE, d, x, y;
 	dx = p2.x - p1.x;
@@ -11,7 +12,7 @@ void shader::traceLine(cv::Point p1, cv::Point p2, cv::Mat& image)
 	if (std::abs(dx) >= std::abs(dy))
 	{
 		declive = dy < 0 ? -1 : 1;
-		if (p1.x > p2.x) shader::traceLine(p2, p1, image);
+		if (p1.x > p2.x) shader::traceLine(p2, p1);
 
 		dy *= declive;
 		incE = 2 * dy;
@@ -21,7 +22,7 @@ void shader::traceLine(cv::Point p1, cv::Point p2, cv::Mat& image)
 
 		for (x = p1.x; x <= p2.x; x++)
 		{
-			cv::circle(image, cv::Point(x, y), 0, cv::Scalar(255, 255, 255));
+			cv::circle(Window::image, cv::Point(x, y), 0, cv::Scalar(255, 255, 255));
 
 			if (d <= 0) d += incE;
 			else
@@ -34,7 +35,7 @@ void shader::traceLine(cv::Point p1, cv::Point p2, cv::Mat& image)
 	else
 	{
 		declive = dx < 0 ? -1 : 1;
-		if (p1.y > p2.y) shader::traceLine(p2, p1, image);
+		if (p1.y > p2.y) shader::traceLine(p2, p1);
 
 		dx *= declive;
 		incE = 2 * dx;
@@ -44,7 +45,7 @@ void shader::traceLine(cv::Point p1, cv::Point p2, cv::Mat& image)
 
 		for (y = p1.y; y <= p2.y; y++)
 		{
-			cv::circle(image, cv::Point(x, y), 0, cv::Scalar(255, 255, 255));
+			cv::circle(Window::image, cv::Point(x, y), 0, cv::Scalar(255, 255, 255));
 
 			if (d <= 0) d += incE;
 			else
@@ -56,13 +57,9 @@ void shader::traceLine(cv::Point p1, cv::Point p2, cv::Mat& image)
 	}
 }
 
-
-
-void shader::perspective(std::vector<std::shared_ptr<Vertex>> vertices, uint32_t pov, cv::Mat& image)
+void shader::perspective(std::vector<std::shared_ptr<Vertex>> vertices, uint32_t pov)
 {
-	cv::Point meio(image.cols / 2, image.rows / 2);
 	std::vector<cv::Point> points;
-	Vec3f camera(0, 0, -1);
 
 	for (int i = 0; i < vertices.size(); i++)
 	{
@@ -74,14 +71,14 @@ void shader::perspective(std::vector<std::shared_ptr<Vertex>> vertices, uint32_t
 		px = x * pov / (z + pov);
 		py = y * pov / (z + pov);
 
-		points.push_back(cv::Point(px + meio.x, py + meio.y));
+		points.push_back(cv::Point(px + Window::center.x, py + Window::center.y));
 	}
 
 	for (uint32_t i = 0; i < points.size() - 1; i++)
-		shader::traceLine(points.at(i), points.at(i + 1), image);
+		shader::traceLine(points.at(i), points.at(i + 1));
 
 	//last
-	shader::traceLine(points.at(points.size() - 1), points.at(0), image);
+	shader::traceLine(points.at(points.size() - 1), points.at(0));
 }
 
 
